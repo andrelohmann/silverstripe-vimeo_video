@@ -1,4 +1,4 @@
-# Silverstripe Vimeo Video File - (c) Eduard Malyj (and others) 2015
+# Silverstripe Vimeo Video File - (c) Eduard Malyj (and others) 2016
 
 ## Maintainer Contact 
  * Eduard Malyj
@@ -9,7 +9,7 @@
 
 ## Requirements
 
-Silverstripe 3.2.x
+Silverstripe 3.3.x
  
 
 ## Overview
