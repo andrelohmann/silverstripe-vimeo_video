@@ -3,9 +3,9 @@
 class VimeoVideoFile extends VideoFile {
 
     
-    private static $client_id = null;
-    private static $client_secret = null;
-    private static $access_token = null;
+        private static $client_id = null;
+        private static $client_secret = null;
+        private static $access_token = null;
 	private static $api_request_time = 900;
 	
 	private static $album_id = null;
@@ -33,22 +33,24 @@ class VimeoVideoFile extends VideoFile {
 	private static $db = array(
 		'VimeoProcessingStatus' => "Enum(array('unprocessed','uploading','updating','processing','processingerror','error','finished'))", // uploading, processing, finished
 		'VimeoURI'   =>  'Varchar(255)',
-        'VimeoLink'  =>  'Varchar(255)',
-        'VimeoID' => 'Varchar(255)',
-        'VimeoHLSUrl' => 'Varchar(255)',
-        'VimeoHLSUrlSecure' => 'Varchar(255)',
+                'VimeoLink'  =>  'Varchar(255)',
+                'VimeoID' => 'Varchar(255)',
+                'VimeoHLSUrl' => 'Varchar(255)',
+                'VimeoHLSUrlSecure' => 'Varchar(255)',
 		'VimeoFullHDUrl' => 'Varchar(255)', // 1080p
 		'VimeoFullHDUrlSecure' => 'Varchar(255)', // 1080p
 		'VimeoHDUrl' => 'Varchar(255)', // 720p
 		'VimeoHDUrlSecure' => 'Varchar(255)', // 720p
-		'VimeoSDUrl' => 'Varchar(255)', // 360p
-		'VimeoSDUrlSecure' => 'Varchar(255)', // 360p
-        'VimeoPicturesURI'  =>  'Varchar(255)'
+		'VimeoSDUrl' => 'Varchar(255)', // 540p
+		'VimeoSDUrlSecure' => 'Varchar(255)', // 540p
+		'VimeoMobileUrl' => 'Varchar(255)', // 360p
+		'VimeoMobileUrlSecure' => 'Varchar(255)', // 360p
+                'VimeoPicturesURI'  =>  'Varchar(255)'
 	);
 	
 	private static $defaults = array(
 		'VimeoProcessingStatus' => 'unprocessed'
-    );
+        );
 	
 	protected function getLogFile(){
 		if(!$this->log_file){
@@ -57,32 +59,32 @@ class VimeoVideoFile extends VideoFile {
 		return $this->log_file;
 	}
 
-    public function process($LogFile = false, $runAfterProcess = true) {
+        public function process($LogFile = false, $runAfterProcess = true) {
         
-        if(!$LogFile) $LogFile = $this->getLogFile();
-		
-		switch($this->ProcessingStatus){
-			case 'new':
-				if(parent::process($LogFile, $runAfterProcess)){
-					$this->vimeoProcess($LogFile, $runAfterProcess);
-				}else{
-					// Something went wrong
-				}
-			break;
-			
-			case 'finished':
-				$this->vimeoProcess($LogFile, $runAfterProcess);
-			break;
-			
-			case 'processing':
-				// just do nothing
-			break;
-		
-			case 'error':
-				// just do nothing
-			break;
-		}
-	}
+            if(!$LogFile) $LogFile = $this->getLogFile();
+
+            switch($this->ProcessingStatus){
+                    case 'new':
+                            if(parent::process($LogFile, $runAfterProcess)){
+                                    $this->vimeoProcess($LogFile, $runAfterProcess);
+                            }else{
+                                    // Something went wrong
+                            }
+                    break;
+
+                    case 'finished':
+                            $this->vimeoProcess($LogFile, $runAfterProcess);
+                    break;
+
+                    case 'processing':
+                            // just do nothing
+                    break;
+
+                    case 'error':
+                            // just do nothing
+                    break;
+            }
+        }
 		
 	protected function vimeoProcess($LogFile, $runAfterProcess = true){
 		
@@ -177,7 +179,7 @@ class VimeoVideoFile extends VideoFile {
 					return false;
 				}
 			
-            } else {
+                        } else {
 				$this->appendLog($LogFile, "Missing clientID or clientSecret");
 				
 				$this->VimeoProcessingStatus = 'unprocessed';
@@ -196,7 +198,7 @@ class VimeoVideoFile extends VideoFile {
 			return false;
 		}
          
-    }
+        }
 	
 	protected function extractUrls($data){
 		// if status is "available", we need to check if allready all resolution files are really available
@@ -224,9 +226,12 @@ class VimeoVideoFile extends VideoFile {
 			$availRes = array();
 			foreach($data['body']['files'] as $f){
 				if(isset($f['quality']) && isset($f['width']) && isset($f['height']) && isset($f['link']) && isset($f['link_secure'])){
-					if($f['quality'] == 'sd'){
-						$availRes['sd'] = $f['link'];
-						$availRes['sd_secure'] = $f['link_secure'];
+					if($f['quality'] == 'sd' && $f['height'] == 360){
+						$availRes['mobile'] = $f['link'];
+						$availRes['mobile_secure'] = $f['link_secure'];
+					}else if($f['quality'] == 'sd' && $f['height'] == 540){
+						$availRes['hd'] = $f['link'];
+						$availRes['hd_secure'] = $f['link_secure'];
 					}else if($f['quality'] == 'hd' && $f['height'] == 720){
 						$availRes['hd'] = $f['link'];
 						$availRes['hd_secure'] = $f['link_secure'];
@@ -252,6 +257,8 @@ class VimeoVideoFile extends VideoFile {
 						$this->VimeoHDUrlSecure = $availRes['hd_secure'];
 						$this->VimeoSDUrl = $availRes['sd'];
 						$this->VimeoSDUrlSecure = $availRes['sd_secure'];
+						$this->VimeoMobileUrl = $availRes['mobile'];
+						$this->VimeoMobileUrlSecure = $availRes['mobile_secure'];
 						$this->VimeoPicturesURI = $data['body']['pictures']['uri'];
 						if(isset($availRes['hls'])){
 							$this->VimeoHLSUrl = $availRes['hls'];
@@ -272,6 +279,8 @@ class VimeoVideoFile extends VideoFile {
 						$this->VimeoHDUrlSecure = $availRes['hd_secure'];
 						$this->VimeoSDUrl = $availRes['sd'];
 						$this->VimeoSDUrlSecure = $availRes['sd_secure'];
+						$this->VimeoMobileUrl = $availRes['mobile'];
+						$this->VimeoMobileUrlSecure = $availRes['mobile_secure'];
 						$this->VimeoPicturesURI = $data['body']['pictures']['uri'];
 						if(isset($availRes['hls'])){
 							$this->VimeoHLSUrl = $availRes['hls'];
@@ -292,6 +301,8 @@ class VimeoVideoFile extends VideoFile {
 						$this->VimeoHDUrlSecure = null;
 						$this->VimeoSDUrl = $availRes['sd'];
 						$this->VimeoSDUrlSecure = $availRes['sd_secure'];
+						$this->VimeoMobileUrl = $availRes['mobile'];
+						$this->VimeoMobileUrlSecure = $availRes['mobile_secure'];
 						$this->VimeoPicturesURI = $data['body']['pictures']['uri'];
 						if(isset($availRes['hls'])){
 							$this->VimeoHLSUrl = $availRes['hls'];
@@ -330,7 +341,8 @@ class VimeoVideoFile extends VideoFile {
 						$this->process();
 					break;
 				
-					case 'processing':
+					case 'updating':
+                                        case 'processing':
 						
 						$this->appendLog($this->getLogFile(), 'IsProcessed - processing');
 						
@@ -404,8 +416,17 @@ class VimeoVideoFile extends VideoFile {
     
     public function getSDUrl() {
         if($this->VimeoProcessingStatus == 'finished'){
-			if($this->VimeoSDUrl)
-				return $this->VimeoSDUrl;
+			if($this->VimeoSDUrl) return $this->VimeoSDUrl;
+			else return $this->getMobileUrl();
+		}else{
+			return false;
+		}
+    }
+    
+    public function getMobileUrl() {
+        if($this->VimeoProcessingStatus == 'finished'){
+			if($this->VimeoMobileUrl)
+				return $this->VimeoMobileUrl;
 			else
 				return false;
 		}else{
@@ -441,8 +462,17 @@ class VimeoVideoFile extends VideoFile {
     
     public function getSDUrlSecure() {
         if($this->VimeoProcessingStatus == 'finished'){
-			if($this->VimeoSDUrlSecure)
-				return $this->VimeoSDUrlSecure;
+			if($this->VimeoSDUrlSecure) return $this->VimeoSDUrlSecure;
+			else return $this->getMobileUrlSecure();
+		}else{
+			return false;
+		}
+    }
+    
+    public function getMobileUrlSecure() {
+        if($this->VimeoProcessingStatus == 'finished'){
+			if($this->VimeoMobileUrlSecure)
+				return $this->VimeoMobileUrlSecure;
 			else
 				return false;
 		}else{
