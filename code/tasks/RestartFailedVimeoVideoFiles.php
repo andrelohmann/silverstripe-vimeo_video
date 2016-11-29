@@ -28,7 +28,7 @@ class RestartFailedVimeoVideoFiles extends BuildTask {
 	 */
 	public function run($request) {
 		$failedFiles = 0;
-		$Videos = VimeoVideoFile::get()->filter(array('VimeoProcessingStatus' => array('error', 'processingerror')));
+		$Videos = VimeoVideoFile::get()->filter(array('VimeoProcessingStatus' => array('error', 'processingerror')))->sort('ID');
 
 		foreach($Videos as $vid){
 			

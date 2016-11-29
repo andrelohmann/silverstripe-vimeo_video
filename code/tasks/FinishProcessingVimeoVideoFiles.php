@@ -29,7 +29,7 @@ class FinishProcessingVimeoVideoFiles extends BuildTask {
 	public function run($request) {
 		$processingFiles = 0;
 		$processedFiles = 0;
-		$VimeoVideos = VimeoVideoFile::get()->filter(array('VimeoProcessingStatus' => array('processing', 'updating')));
+		$VimeoVideos = VimeoVideoFile::get()->filter(array('VimeoProcessingStatus' => array('processing', 'updating')))->sort('ID');
 
 		foreach($VimeoVideos as $vid){
 			
