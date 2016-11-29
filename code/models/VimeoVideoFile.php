@@ -54,7 +54,7 @@ class VimeoVideoFile extends VideoFile {
 	
 	protected function getLogFile(){
 		if(!$this->log_file){
-			$this->log_file = TEMP_FOLDER.'/VimeoVideoFileProcessing-ID-'.$this->ID.'-'.md5($this->getRelativePath()).'.log';
+			$this->log_file = TEMP_FOLDER.'/VimeoVideoFileProcessing-ID-'.$this->ID.'.log';
 		}
 		return $this->log_file;
 	}
