@@ -28,7 +28,7 @@ class UpdateVimeoVideoFiles extends BuildTask {
 	 */
 	public function run($request) {
 		$updatedFiles = 0;
-		$VimeoVideos = VimeoVideoFile::get()->filter(array('VimeoProcessingStatus' => 'finished'));
+		$VimeoVideos = VimeoVideoFile::get()->filter(array('VimeoProcessingStatus' => 'finished'))->sort('ID');
 
 		foreach($VimeoVideos as $vid){
 			
